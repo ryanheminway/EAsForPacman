@@ -52,6 +52,10 @@ import types
 import time
 import random
 import os
+# Added for genetic
+from dill_utils import map_with_dill
+import numpy as np
+from pathlib import Path
 
 ###################################################
 # YOUR INTERFACE TO THE PACMAN WORLD: A GameState #
@@ -516,10 +520,19 @@ def readCommand(argv):
     """
     parser = OptionParser(usageStr)
 
-    # (NOTE Ryan) added this genetic option
+    # (NOTE Ryan) added these options for GA runs
     parser.add_option('--genetic', dest='isGenetic', action='store_true', 
                       help='Train a GeneticAgent using the GA algorithm', 
                       default=False)
+    parser.add_option('--gens', type='int', dest='numGenerations',
+                      help=default('The number of generations to train for'), default=100)
+    parser.add_option('--pop', type='int', dest='sizePop',
+                      help=default('The size of the population to use'), default=100)
+    parser.add_option('--mutation', type='float', dest='mutationRate',
+                      help=default('Rate of mutation to use (0.0-1.0)'), default=0.1)
+    parser.add_option('--crossover', type='float', dest='crossoverRate',
+                      help=default('Rate of crossover to use (0.0-1.0)'), default=0.9)
+    #
     parser.add_option('-n', '--numGames', dest='numGames', type='int',
                       help=default('the number of GAMES to play'), metavar='GAMES', default=1)
     parser.add_option('-l', '--layout', dest='layout',
@@ -611,6 +624,10 @@ def readCommand(argv):
     args['catchExceptions'] = options.catchExceptions
     args['timeout'] = options.timeout
     args['genetic'] = options.isGenetic
+    args['population'] = options.sizePop
+    args['generations'] = options.numGenerations
+    args['mutation'] = options.mutationRate
+    args['crossover'] = options.crossoverRate
 
     # Special case: recorded games don't use the runGames method or args structure
     if options.gameToReplay != None:
@@ -677,12 +694,15 @@ def replayGame(layout, actions, display):
     display.finish()
 
 
-def runGames(layout, pacman, ghosts, display, numGames, record, numTraining=0, catchExceptions=False, timeout=30, genetic=False):
+def runGames(layout, pacman, ghosts, display, numGames, record, numTraining=0,
+             catchExceptions=False, timeout=30, genetic=False, population=100,
+             generations=100, mutation=0.1, crossover=0.9):
     import __main__
     __main__.__dict__['_display'] = display
     
+    # If running GA, jump to our own code
     if (genetic):
-        return runGenetic(layout, ghosts, display, numGames, record, numTraining=0, catchExceptions=False, timeout=30)
+        return runGenetic(layout, ghosts, display, population, generations, mutation, crossover)
 
     rules = ClassicGameRules(timeout)
     games = []
@@ -726,17 +746,16 @@ def runGames(layout, pacman, ghosts, display, numGames, record, numTraining=0, c
 
     return games
 
-def runGenetic(layout, ghosts, display, numGames, record, numTraining=0, catchExceptions=False, timeout=30):
+def runGenetic(layout, ghosts, display, population, generations, mutation, crossover):
     """
     Run Genetic Algorithm for training the GeneticAgent. Does not take in a 
     Pacman type, because this method always uses GeneticAgent. 
     """
-    from dill_utils import map_with_dill
     from pacmanNN import PacmanControllerModel
     from geneticTraining import GeneticAlgorithm, SteadyStateGA, GenerationalGA
     from geneticAgents import GeneticAgent
-    import numpy as np
-    rules = ClassicGameRules(timeout)
+
+    rules = ClassicGameRules(30)
     def geneticFitnessFn(individual):
         """
         Fitness function for the genetic algorithm. Given an individual, a vector 
@@ -755,10 +774,10 @@ def runGenetic(layout, ghosts, display, numGames, record, numTraining=0, catchEx
         score = 0
 
         # (NOTE Ryan) trying average score of 10 runs
-        numGames = 1
+        numGames = 10
         for i in range(numGames):
             game = rules.newGame(layout, currentPacman, ghosts,
-                                 gameDisplay, True, catchExceptions)
+                                 gameDisplay, True, False)
             
             game.run()
             score += game.state.getScore()
@@ -774,57 +793,62 @@ def runGenetic(layout, ghosts, display, numGames, record, numTraining=0, catchEx
         """
         return (score / numGames)
     
-    # Parameter search
     # Setup models folder
-    from pathlib import Path
-    model_path = str(Path.cwd()) + "/models/FixedSeed+Walls+Xavier+Truncated20230310/"
+    model_path = str(Path.cwd()) + "/models/"
     Path(model_path).mkdir(parents=True, exist_ok=True)
     
-    # # PARAMETER LOOP 1: Search over num_individuals
-    # for popSize in [1000]: # [25, 100, 500]:
-    #     # PARAMETER LOOP 2: Search over tourny_size
-    #     for tournySize in [10]: # [2, 5, 10, 20]:
-    #         # PARAMETER LOOP 3: Search over rate_mutation
-    #         for mutation in [0.01, 0.05, 0.1]: #, 0.05, 0.1]: # [0.01, 0.05, 0.1]:
-    #             for crossover in [0.5]:
-    #                 print("Running parameter search for settings: [N=", popSize," T=", tournySize," M=", mutation,"C=",crossover, "]")
-    #                 # SteadyStateGA
-    #                 gaTraining = GenerationalGA(fitness_fn=geneticFitnessFn, 
-    #                                               num_genes=PacmanControllerModel().getWeights().size, 
-    #                                               num_individuals=popSize,
-    #                                               tourny_size=tournySize,
-    #                                               rate_mutation=mutation, 
-    #                                               rate_crossover=crossover)
-    #                 bestByGen = gaTraining.run()
-    #                 bestWeights = bestByGen[gaTraining.num_generations - 1]
-                    
-    #                 # Save weights to a file
-    #                 weightsFileName = model_path + "bigLayer1GameG1000N" + str(popSize) + "T" + str(tournySize) + "M" + str(mutation) + "C" + str(crossover) + ".bin"
-    #                 np.save(weightsFileName, bestWeights)
+    # Run GA
+    gaTraining = GenerationalGA(fitness_fn=geneticFitnessFn, 
+                                  num_genes=PacmanControllerModel().getWeights().size, 
+                                  num_generations=generations,
+                                  num_individuals=population,
+                                  #tourny_size=tournySize,
+                                  rate_mutation=mutation, 
+                                  rate_crossover=crossover)
+    bestByGen = gaTraining.run()
+    bestWeights = bestByGen[gaTraining.num_generations - 1]
+    
+    weightsFileTemplateStr = "{desc}G{gens}N{pop}M{mut}C{cross}"
+    
+    # Save weights to a file
+    weightsFileName = model_path + weightsFileTemplateStr.format(desc="testtest",
+                                                                  gens=gaTraining.num_generations, 
+                                                                  pop=gaTraining.num_individuals,
+                                                                  mut=gaTraining.rate_mutation,
+                                                                  cross=gaTraining.rate_crossover)
+    np.save(weightsFileName, bestWeights)
     
     
+    return 0
+
+def replaySavedModel(model_path, layout, ghosts, display):
+    """
+    Runs a single Pacman game based on a pre-trained model, given as a path
+    to a binary file.
+
+    Parameters
+    ----------
+    model_path : STRING
+        Full path to stored binary file representing model to load and use as 
+        Pacman controller
+    """
+    from pacmanNN import PacmanControllerModel
+    from geneticAgents import GeneticAgent
     # # # SteadyStateGA
-    bestWeights = np.load(model_path + "FixedSeed+Walls+Xavier+Truncated202303101GamesG100N1000T10M0.01C0.5.bin.npy")
+    bestWeights = np.load(model_path)
     input("Press Enter to continue...")
     input("Press Enter to continue...")
     # show best
+    rules = ClassicGameRules(30)
     rules.quiet = False
-    print("Got best weights:")
-    print(bestWeights)
-    # bestWeights = np.array([1.0, 1.0, 1.0, 1.0, -1.0, -1.0, -1.0, -1.0,
-    #                         1.0, 1.0, 1.0, 1.0, -1.0, -1.0, -1.0, -1.0, 
-    #                         1.0, 1.0, 1.0, 1.0, -1.0, -1.0, -1.0, -1.0,
-    #                         1.0, 1.0, 1.0, 1.0, -1.0, -1.0, -1.0, -1.0,
-    #                         0.5, 0.5, 0.5, 0.5,
-    #                         1.0, 1.0, 1.0, 1.0,
-    #                         1.0, 1.0, 1.0, 1.0, 
-    #                         1.0, 1.0, 1.0, 1.0, 
-    #                         1.0, 1.0, 1.0, 1.0, 
-    #                         0.5, 0.5, 0.5, 0.5])
+    # print("Got best weights:")
+    # print(bestWeights)
+    # Make a neural network based on the weights
     bestNN = PacmanControllerModel(weights=bestWeights)
+    # Make an agent based on the nn acting as a control policy
     bestPacman = GeneticAgent(policy=bestNN, verbose=False)
     rules.newGame(layout, bestPacman, ghosts,
-                          display, False, catchExceptions).run()
+                          display, False, False).run()
     
     return 0
 

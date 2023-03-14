@@ -230,7 +230,7 @@ class GenerationalGA(GeneticAlgorithm):
     individuals with the highest fitness of a given generation. These individuals
     survive between generations. 
     """
-    def __init__(self, fitness_fn, num_genes=4, num_individuals=100, num_generations=1000,
+    def __init__(self, fitness_fn, num_genes=4, num_individuals=100, num_generations=100,
                  rate_mutation=0.1, rate_crossover=0.5, proportion_elite=0.2, tourny_size=20):
         super().__init__(fitness_fn, num_genes, num_individuals, num_generations, 
                        rate_mutation, rate_crossover)

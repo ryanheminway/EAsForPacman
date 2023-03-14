@@ -615,7 +615,7 @@ class AnyGhostSearchProblem(PositionSearchProblem):
     """
     def __init__(self, gameState):
         """ Stores information from the gameState.  You don't need to change this. """
-        # Store the food for later reference
+        # Store the positions for later reference
         self.ghostPositions = gameState.getGhostPositions()
 
         # Store info for the PositionSearchProblem (no need to change this)
