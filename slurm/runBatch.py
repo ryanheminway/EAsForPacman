@@ -9,4 +9,4 @@
 #SBATCH --output=batchLog.txt
 cd /home/heminway.r/EAsForPacman-main/
 source activate EAResearch
-python pacman.py -k 1 -g DirectionalGhost -l smallClassicGA --genetic 
+python pacman.py -k 1 -g DirectionalGhost -l smallClassicGA --gens 1000 --pop 1000 --mutation 0.05 --crossover 0.5 --genetic 
