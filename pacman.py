@@ -797,6 +797,10 @@ def runGenetic(layout, ghosts, display, population, generations, mutation, cross
     model_path = str(Path.cwd()) + "/models/"
     Path(model_path).mkdir(parents=True, exist_ok=True)
     
+    # # Run pre-trained model
+    # model_path = model_path + "Walls+Xavier+Truncated20230317/" + "bigLayerSlurmG1000N1000T10M0.1C0.5.bin.npy"
+    # replaySavedModel(model_path, layout, ghosts, display)
+    
     # Run GA
     gaTraining = GenerationalGA(fitness_fn=geneticFitnessFn, 
                                   num_genes=PacmanControllerModel().getWeights().size, 
@@ -811,7 +815,7 @@ def runGenetic(layout, ghosts, display, population, generations, mutation, cross
     weightsFileTemplateStr = "{desc}G{gens}N{pop}M{mut}C{cross}"
     
     # Save weights to a file
-    weightsFileName = model_path + weightsFileTemplateStr.format(desc="testtest",
+    weightsFileName = model_path + weightsFileTemplateStr.format(desc="initWeights",
                                                                   gens=gaTraining.num_generations, 
                                                                   pop=gaTraining.num_individuals,
                                                                   mut=gaTraining.rate_mutation,

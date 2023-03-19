@@ -29,9 +29,11 @@ class PacmanControllerModel(object):
                 to match the returned format from `getWeights()`
                 
     """
-    def __init__(self, in_dim=12, hidden_dim=6, weights=np.array([])):
+    def __init__(self, in_dim=12, hidden_dim=24, weights=np.array([])):
         assert(in_dim > 0)
         assert(hidden_dim > 0)
+        self.in_dim = in_dim
+        self.hidden_dim = hidden_dim
         # Initialize model parameters
         self.W1 = nn.Parameter(in_dim,hidden_dim)
         self.b1 = nn.Parameter(1,hidden_dim)
@@ -93,6 +95,26 @@ class PacmanControllerModel(object):
         out_layer = np.concatenate((self.W2.data, self.b2.data), axis=None)
         
         return np.concatenate((first_layer, out_layer), axis=None)
+    
+    def initFlatWeights(self):
+        """
+        Helper to initialize all weights and biases in a NN. Uses a rough 
+        Xavier initialization where all biases are set to 0.
+        """
+        w1 = np.random.uniform(low=-np.sqrt(1/(self.in_dim)), high=np.sqrt((1/(self.in_dim))), size=self.in_dim * self.hidden_dim).round(3)
+        b1 = np.zeros(self.hidden_dim)
+        w2 = np.random.uniform(low=-np.sqrt(1/(self.hidden_dim)), high=np.sqrt((1/(self.hidden_dim))), size=self.hidden_dim * 4).round(3)
+        b2 = np.zeros(4)
+        
+        weights = np.concatenate((w1, b1, w2, b2), axis=None).round(3)
+        print("flat weights: ", weights)
+        return weights
+    
+    def initSingleWeight(self):
+        """
+        Helper to initialize a single weight in a NN
+        """
+        return round(np.random.uniform(low=-np.sqrt(1/self.hidden_dim), high=np.sqrt(1/self.hidden_dim)), 3)
         
     
     

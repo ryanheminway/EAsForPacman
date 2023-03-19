@@ -7,6 +7,7 @@ neural network.
 import numpy as np
 from util import *
 from dill_utils import map_with_dill
+import pacmanNN
 
 class GeneticAlgorithm:
     """
@@ -52,20 +53,11 @@ class GeneticAlgorithm:
         """
         Generate a random individual chromosome. Resulting shape is 1xnum_genes
         """
-        individual = np.random.uniform(low=-np.sqrt(6/36), high=np.sqrt((6/36)), size=num_genes).round(3)
-        # # Attempting crude zeroing of biases
-        # Below is for 12x6x1 network
-        #individual[72:76] = 0.0
-        #individual[-4:] = 0.0
-        # Below is for 12x24x1 network
-        individual[288:292] = 0.0
-        individual[-4:] = 0.0
-        return individual
+        return pacmanNN.PacmanControllerModel().initFlatWeights()
     
     @staticmethod
     def generate_random_allele():
-        return round(np.random.uniform(low=-np.sqrt(6/36), high=np.sqrt(6/36)), 3)
-        #return round(np.random.uniform(low=-1.0, high=1.0), 3)
+        return pacmanNN.PacmanControllerModel().initSingleWeight()
         
     def run(self):
         """
@@ -251,11 +243,10 @@ class GenerationalGA(GeneticAlgorithm):
             5. Repeat steps 3-5 until next generation has large enough population.
         """
         #print("Running GA generation #", self.generation)
-        # 1. Assess fitness of all individuals
         # preallocate parents. This will get overwritten
         parents = np.array([self.individuals[0], self.individuals[1]])
         
-        # 2. Copy Elites
+        # 1. Copy Elites
         nextPopulation = self.individuals.copy()
         nextScores = self.scores.copy()
         bestIndices = np.argpartition(self.scores, -self.num_elites)[-self.num_elites:]
@@ -266,10 +257,10 @@ class GenerationalGA(GeneticAlgorithm):
         nextIdx = self.num_elites
         for n in range(int((self.num_individuals - self.num_elites) / 2)):
             
-            # 3. Pick 2 parents using tournament selection
+            # 2. Pick 2 parents using tournament selection
             for i in range(2):
                 #parents[i] = GeneticAlgorithm.tournamentSelect(self.scores, self.individuals, tournySize=self.tourny_size)
-                # (TRYING THIS OVER TOURNAMENT SELECTION) Use a random elite as a parent
+                # (TRYING TRUNCATED SELECTION OVER TOURNAMENT SELECTION) Use a random elite as a parent
                 parents[i] = nextPopulation[np.random.randint(0, self.num_elites)]
                 
             # Perform single point crossover between parents to generate child.
