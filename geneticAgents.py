@@ -27,8 +27,8 @@ class GeneticAgent(Agent):
     
     def calibrate(self, state):
         self.num_food_total = state.getNumFood()
-        # Perimeter of map
-        self.max_path_length = 2 * len(state.getWalls().data) + 2 * len(state.getWalls().data[0])
+        # 1/2 Perimeter of map
+        self.max_path_length = len(state.getWalls().data) + len(state.getWalls().data[0])
         self.need_calibration = False
 
     def getAction(self, state):
@@ -50,7 +50,9 @@ class GeneticAgent(Agent):
                 self.powerpill_time_consumed = 0
                 break
 
-        features = np.array([[self.calcPillLocationFeature(state, Directions.NORTH),
+        features = np.array([[self.calcPillsLeftFeature(state),
+                              self.calcPowerLeftFeature(state),
+                              self.calcPillLocationFeature(state, Directions.NORTH),
                               self.calcPillLocationFeature(state, Directions.EAST),
                               self.calcPillLocationFeature(state, Directions.SOUTH),
                               self.calcPillLocationFeature(state, Directions.WEST),
@@ -58,11 +60,19 @@ class GeneticAgent(Agent):
                               self.calcGhostLocationFeature(state, Directions.EAST),
                               self.calcGhostLocationFeature(state, Directions.SOUTH),
                               self.calcGhostLocationFeature(state, Directions.WEST),
+                              self.calcScaredGhostLocationFeature(state, Directions.NORTH),
+                              self.calcScaredGhostLocationFeature(state, Directions.EAST),
+                              self.calcScaredGhostLocationFeature(state, Directions.SOUTH),
+                              self.calcScaredGhostLocationFeature(state, Directions.WEST),
+                              self.calcMaintainActionFeature(state, Directions.NORTH),
+                              self.calcMaintainActionFeature(state, Directions.EAST),
+                              self.calcMaintainActionFeature(state, Directions.SOUTH),
+                              self.calcMaintainActionFeature(state, Directions.WEST),
                               self.calcAvoidWallsFeature(state, Directions.NORTH),
                               self.calcAvoidWallsFeature(state, Directions.EAST),
                               self.calcAvoidWallsFeature(state, Directions.SOUTH),
-                              self.calcAvoidWallsFeature(state, Directions.WEST)]])
-                              #self.calcPowerLeftFeature(state)]])
+                              self.calcAvoidWallsFeature(state, Directions.WEST),
+                              ]])
         if (self.verbose):
             print("Got feature vector:")
             print(features)
@@ -127,7 +137,7 @@ class GeneticAgent(Agent):
         shortest_len = self.shortestLengthForProblem(AnyFoodSearchProblem(state), direction)
         if (shortest_len == -1):
             return 0
-        return ((self.max_path_length / 2) - shortest_len) / (self.max_path_length / 2)
+        return (self.max_path_length - shortest_len) / self.max_path_length
     
     def calcGhostLocationFeature(self, state, direction):
         """
@@ -139,7 +149,7 @@ class GeneticAgent(Agent):
         shortest_len = self.shortestLengthForProblem(AnyGhostSearchProblem(state), direction)
         if (shortest_len == -1):
             return 0
-        return ((self.max_path_length / 2) - shortest_len) / (self.max_path_length / 2)
+        return (self.max_path_length - shortest_len) / self.max_path_length
     
     def calcScaredGhostLocationFeature(self, state, direction):
         """

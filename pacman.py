@@ -799,29 +799,29 @@ def runGenetic(layout, ghosts, display, population, generations, mutation, cross
     Path(model_path).mkdir(parents=True, exist_ok=True)
     
     # Run pre-trained model
-    model_path = model_path + "newXavierSlurmExperiments20230319/" + "newWeightsBaselineG1000N1000M0.01C0.5.npy"
-    replaySavedModel(model_path, layout, ghosts, display)
+    # model_path = model_path + "newXavierSlurmExperiments20230319/" + "newWeightsBaselineG1000N1000M0.01C0.5.npy"
+    # replaySavedModel(model_path, layout, ghosts, display)
     
     # Run GA
-    # gaTraining = GenerationalGA(fitness_fn=geneticFitnessFn, 
-    #                               num_genes=PacmanControllerModel().getWeights().size, 
-    #                               num_generations=generations,
-    #                               num_individuals=population,
-    #                               #tourny_size=tournySize,
-    #                               rate_mutation=mutation, 
-    #                               rate_crossover=crossover)
-    # bestByGen = gaTraining.run()
-    # bestWeights = bestByGen[gaTraining.num_generations - 1]
+    gaTraining = GenerationalGA(fitness_fn=geneticFitnessFn, 
+                                  num_genes=PacmanControllerModel().getWeights().size, 
+                                  num_generations=generations,
+                                  num_individuals=population,
+                                  #tourny_size=tournySize,
+                                  rate_mutation=mutation, 
+                                  rate_crossover=crossover)
+    bestByGen = gaTraining.run()
+    bestWeights = bestByGen[gaTraining.num_generations - 1]
     
-    # weightsFileTemplateStr = "{desc}G{gens}N{pop}M{mut}C{cross}"
+    weightsFileTemplateStr = "{desc}G{gens}N{pop}M{mut}C{cross}"
     
-    # # Save weights to a file
-    # weightsFileName = model_path + weightsFileTemplateStr.format(desc="initWeights",
-    #                                                               gens=gaTraining.num_generations, 
-    #                                                               pop=gaTraining.num_individuals,
-    #                                                               mut=gaTraining.rate_mutation,
-    #                                                               cross=gaTraining.rate_crossover)
-    # np.save(weightsFileName, bestWeights)
+    # Save weights to a file
+    weightsFileName = model_path + weightsFileTemplateStr.format(desc="testNew",
+                                                                  gens=gaTraining.num_generations, 
+                                                                  pop=gaTraining.num_individuals,
+                                                                  mut=gaTraining.rate_mutation,
+                                                                  cross=gaTraining.rate_crossover)
+    np.save(weightsFileName, bestWeights)
     
     
     return 0

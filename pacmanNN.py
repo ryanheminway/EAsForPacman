@@ -29,7 +29,7 @@ class PacmanControllerModel(object):
                 to match the returned format from `getWeights()`
                 
     """
-    def __init__(self, in_dim=12, hidden_dim=24, weights=np.array([])):
+    def __init__(self, in_dim=22, hidden_dim=24, weights=np.array([])):
         assert(in_dim > 0)
         assert(hidden_dim > 0)
         self.in_dim = in_dim
