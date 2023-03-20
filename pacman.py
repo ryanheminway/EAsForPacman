@@ -839,7 +839,6 @@ def replaySavedModel(model_path, layout, ghosts, display):
     """
     from pacmanNN import PacmanControllerModel
     from geneticAgents import GeneticAgent
-    # # # SteadyStateGA
     bestWeights = np.load(model_path)
     input("Press Enter to continue...")
     input("Press Enter to continue...")
