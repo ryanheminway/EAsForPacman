@@ -50,10 +50,6 @@ class GeneticAgent(Agent):
                 self.powerpill_time_consumed = 0
                 break
 
-        # features = np.array([[self.calcPillLocationFeature(state, Directions.NORTH),
-        #                       self.calcPillLocationFeature(state, Directions.EAST),
-        #                       self.calcPillLocationFeature(state, Directions.SOUTH),
-        #                       self.calcPillLocationFeature(state, Directions.WEST)]])
         features = np.array([[self.calcPillLocationFeature(state, Directions.NORTH),
                               self.calcPillLocationFeature(state, Directions.EAST),
                               self.calcPillLocationFeature(state, Directions.SOUTH),
@@ -66,14 +62,15 @@ class GeneticAgent(Agent):
                               self.calcAvoidWallsFeature(state, Directions.EAST),
                               self.calcAvoidWallsFeature(state, Directions.SOUTH),
                               self.calcAvoidWallsFeature(state, Directions.WEST)]])
+                              #self.calcPowerLeftFeature(state)]])
         if (self.verbose):
             print("Got feature vector:")
             print(features)
-        #Run features through policy NN to get scores for each direction
+        # Run features through policy NN to get scores for each direction
         run_result = self.policy.run(nn.Constant(data=features))
         # Softmax to get log probabilities over actions
         softmax_result = nn.SoftmaxLoss.log_softmax(run_result.data)
-        #print(softmax_result)
+        # print(softmax_result)
         action_idx = np.argmax(softmax_result)  
         # Map array indices to actions
         if (action_idx == 0):
@@ -90,42 +87,6 @@ class GeneticAgent(Agent):
             return action_to_take
         else:
             return Directions.STOP
-        
-        """
-        features = np.array([[self.calcPillsLeftFeature(state),
-                             self.calcPowerLeftFeature(state),
-                             self.calcPillLocationFeature(state, Directions.NORTH),
-                             self.calcPillLocationFeature(state, Directions.EAST),
-                             self.calcPillLocationFeature(state, Directions.SOUTH),
-                             self.calcPillLocationFeature(state, Directions.WEST),
-                             self.calcGhostLocationFeature(state, Directions.NORTH),
-                             self.calcGhostLocationFeature(state, Directions.EAST),
-                             self.calcGhostLocationFeature(state, Directions.SOUTH),
-                             self.calcGhostLocationFeature(state, Directions.WEST),
-                             self.calcScaredGhostLocationFeature(state, Directions.NORTH),
-                             self.calcScaredGhostLocationFeature(state, Directions.EAST),
-                             self.calcScaredGhostLocationFeature(state, Directions.SOUTH),
-                             self.calcScaredGhostLocationFeature(state, Directions.WEST),
-                             self.calcMaintainActionFeature(state, Directions.NORTH),
-                             self.calcMaintainActionFeature(state, Directions.EAST),
-                             self.calcMaintainActionFeature(state, Directions.SOUTH),
-                             self.calcMaintainActionFeature(state, Directions.WEST)]])
-        
-        Temporarily removing scared ghost + maintain action features
-                             self.calcScaredGhostLocationFeature(state, Directions.NORTH),
-                             self.calcScaredGhostLocationFeature(state, Directions.EAST),
-                             self.calcScaredGhostLocationFeature(state, Directions.SOUTH),
-                             self.calcScaredGhostLocationFeature(state, Directions.WEST),
-                             self.calcMaintainActionFeature(state, Directions.NORTH),
-                             self.calcMaintainActionFeature(state, Directions.EAST),
-                             self.calcMaintainActionFeature(state, Directions.SOUTH),
-                             self.calcMaintainActionFeature(state, Directions.WEST)]])
-        Temporarily removing entrapment feature
-                             self.calcEntrapmentFeature(state, Directions.NORTH),
-                             self.calcEntrapmentFeature(state, Directions.EAST),
-                             self.calcEntrapmentFeature(state, Directions.SOUTH),
-                             self.calcEntrapmentFeature(state, Directions.WEST),
-        """
         
     def calcPillsLeftFeature(self, state):
         """
@@ -255,7 +216,6 @@ class GeneticAgent(Agent):
         # print(nextx)
         # print(nexty)
         # print(problem.walls)
-        # print(problem.walls[7])
         # If the direction is valid for a move, simulate the move for search
         if problem.walls[nextx][nexty]:
             return -1

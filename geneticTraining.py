@@ -260,7 +260,7 @@ class GenerationalGA(GeneticAlgorithm):
             # 2. Pick 2 parents using tournament selection
             for i in range(2):
                 #parents[i] = GeneticAlgorithm.tournamentSelect(self.scores, self.individuals, tournySize=self.tourny_size)
-                # (TRYING TRUNCATED SELECTION OVER TOURNAMENT SELECTION) Use a random elite as a parent
+                # (NOTE Ryan) TRYING TRUNCATED SELECTION OVER TOURNAMENT SELECTION: Use a random elite as a parent
                 parents[i] = nextPopulation[np.random.randint(0, self.num_elites)]
                 
             # Perform single point crossover between parents to generate child.
@@ -294,7 +294,7 @@ class GenerationalGA(GeneticAlgorithm):
         
     def crossover(self, a, b, prob_crossover):
         if np.random.random() < prob_crossover:      
-            idx = np.random.randint(0,a.size)
+            idx = np.random.randint(0, a.size)
             return GeneticAlgorithm.singlePointCrossover(a, b, idx)
         else:
             # If crossover didn't occur just return parents

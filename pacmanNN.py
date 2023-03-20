@@ -107,7 +107,6 @@ class PacmanControllerModel(object):
         b2 = np.zeros(4)
         
         weights = np.concatenate((w1, b1, w2, b2), axis=None).round(3)
-        print("flat weights: ", weights)
         return weights
     
     def initSingleWeight(self):
