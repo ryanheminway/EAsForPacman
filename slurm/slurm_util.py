@@ -22,7 +22,8 @@ import subprocess
 import re
 from functools import partial
 
-def submit_job(command, partition='multigpu', gpu_type='v100-sxm2', n_gpu=2,
+
+def submit_job(command, partition='short',
         duration_hours='24', duration_minutes='00', job_name='ryanHeminway', mem_gb=32, n_cpu=4,
         logfile='/home/heminway.r/sbatch_logs.txt', openmode='append'):
     command = ' '.join(['sbatch', 
@@ -30,8 +31,9 @@ def submit_job(command, partition='multigpu', gpu_type='v100-sxm2', n_gpu=2,
                        f'--time={duration_hours}:{duration_minutes}:00',
                        f'--job-name={job_name}',
                        f'--partition={partition}',
-                       f'--gres=gpu:{gpu_type}:{n_gpu}',
                        f'--mem={mem_gb}Gb',
+                       f'--ntasks-per-node=8',
+                       f'--cpus-per-task=4',
                        f'--output={logfile}', '--open-mode={openmode}',
                        # Note that we single-quote the command for safety
                        f"--wrap='{command}'"])
