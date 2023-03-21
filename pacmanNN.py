@@ -101,9 +101,12 @@ class PacmanControllerModel(object):
         Helper to initialize all weights and biases in a NN. Uses a rough 
         Xavier initialization where all biases are set to 0.
         """
-        w1 = np.random.uniform(low=-np.sqrt(1/(self.in_dim)), high=np.sqrt((1/(self.in_dim))), size=self.in_dim * self.hidden_dim).round(3)
+        # (NOTE Ryan 3/21) Trying Gaussian Mutation and Initializations based on https://arxiv.org/pdf/1712.06567.pdf
+        #w1 = np.random.uniform(low=-np.sqrt(1/(self.in_dim)), high=np.sqrt((1/(self.in_dim))), size=self.in_dim * self.hidden_dim).round(3)
+        w1 = np.random.normal(loc=0.0, scale=np.sqrt((1/(self.in_dim))), size=self.in_dim * self.hidden_dim)
         b1 = np.zeros(self.hidden_dim)
-        w2 = np.random.uniform(low=-np.sqrt(1/(self.hidden_dim)), high=np.sqrt((1/(self.hidden_dim))), size=self.hidden_dim * 4).round(3)
+        #w2 = np.random.uniform(low=-np.sqrt(1/(self.hidden_dim)), high=np.sqrt((1/(self.hidden_dim))), size=self.hidden_dim * 4).round(3)
+        w2 = np.random.normal(loc=0.0, scale=np.sqrt((1/(self.hidden_dim))), size=self.hidden_dim * 4)
         b2 = np.zeros(4)
         
         weights = np.concatenate((w1, b1, w2, b2), axis=None).round(3)
@@ -113,8 +116,9 @@ class PacmanControllerModel(object):
         """
         Helper to initialize a single weight in a NN
         """
-        return round(np.random.uniform(low=-np.sqrt(1/self.hidden_dim), high=np.sqrt(1/self.hidden_dim)), 3)
-        
+        # (NOTE Ryan 3/21) Trying Gaussian Mutation and Initializations based on https://arxiv.org/pdf/1712.06567.pdf
+        #return round(np.random.uniform(low=-np.sqrt(1/self.hidden_dim), high=np.sqrt(1/self.hidden_dim)), 3)
+        return round(np.random.normal(loc=0.0, scale=np.sqrt(1/self.hidden_dim)), 3)
     
     
     
