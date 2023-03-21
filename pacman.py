@@ -813,14 +813,15 @@ def runGenetic(layout, ghosts, display, population, generations, mutation, cross
     bestByGen = gaTraining.run()
     bestWeights = bestByGen[gaTraining.num_generations - 1]
     
-    weightsFileTemplateStr = "{desc}G{gens}N{pop}M{mut}C{cross}"
+    weightsFileTemplateStr = "{desc}G{gens}N{pop}M{mut}C{cross}E{elites}"
     
     # Save weights to a file
     weightsFileName = model_path + weightsFileTemplateStr.format(desc="testNew",
                                                                   gens=gaTraining.num_generations, 
                                                                   pop=gaTraining.num_individuals,
                                                                   mut=gaTraining.rate_mutation,
-                                                                  cross=gaTraining.rate_crossover)
+                                                                  cross=gaTraining.rate_crossover,
+                                                                  elites=gaTraining.proportion_elite)
     np.save(weightsFileName, bestWeights)
     
     

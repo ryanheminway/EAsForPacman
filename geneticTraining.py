@@ -227,6 +227,7 @@ class GenerationalGA(GeneticAlgorithm):
         super().__init__(fitness_fn, num_genes, num_individuals, num_generations, 
                        rate_mutation, rate_crossover)
         assert(proportion_elite <= 1 and proportion_elite >= 0)
+        self.proportion_elite = proportion_elite
         self.num_elites = int(proportion_elite * num_individuals)
         self.tourny_size = tourny_size
         self.scores = np.asarray(map_with_dill(self.fitness_fn, self.individuals))
