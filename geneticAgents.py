@@ -60,19 +60,10 @@ class GeneticAgent(Agent):
                               self.calcGhostLocationFeature(state, Directions.EAST),
                               self.calcGhostLocationFeature(state, Directions.SOUTH),
                               self.calcGhostLocationFeature(state, Directions.WEST),
-                              self.calcScaredGhostLocationFeature(state, Directions.NORTH),
-                              self.calcScaredGhostLocationFeature(state, Directions.EAST),
-                              self.calcScaredGhostLocationFeature(state, Directions.SOUTH),
-                              self.calcScaredGhostLocationFeature(state, Directions.WEST),
-                              self.calcMaintainActionFeature(state, Directions.NORTH),
-                              self.calcMaintainActionFeature(state, Directions.EAST),
-                              self.calcMaintainActionFeature(state, Directions.SOUTH),
-                              self.calcMaintainActionFeature(state, Directions.WEST),
                               self.calcAvoidWallsFeature(state, Directions.NORTH),
                               self.calcAvoidWallsFeature(state, Directions.EAST),
                               self.calcAvoidWallsFeature(state, Directions.SOUTH),
-                              self.calcAvoidWallsFeature(state, Directions.WEST),
-                              ]])
+                              self.calcAvoidWallsFeature(state, Directions.WEST)]])
         if (self.verbose):
             print("Got feature vector:")
             print(features)

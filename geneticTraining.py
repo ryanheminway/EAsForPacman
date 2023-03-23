@@ -305,9 +305,7 @@ class GenerationalGA(GeneticAlgorithm):
         a_copy = a.copy()
         # Each gene in the chromosome has a chance to be mutated
         # (NOTE Ryan 3/21) Trying Gaussian Mutation and Initializations based on https://arxiv.org/pdf/1712.06567.pdf
-        print("before mutate: ", a)
         a_copy = a_copy + (self.rate_mutation * np.random.normal(loc=0.0, scale=np.sqrt(1/24), size=a_copy.size).round(3))
-        print("after mutate: ", a_copy)
         # for i in range(a_copy.size):
         #     mutate_chance = np.random.random()
         #     if mutate_chance < self.rate_mutation:
