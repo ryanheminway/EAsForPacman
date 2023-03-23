@@ -15,7 +15,7 @@ def run_dill_fn(f, x, *args, **kwargs):
     return fn(x, *args, **kwargs)
         
 def map_with_dill(fn, inputs, *args, **kwargs):
-    pool = Pool(8)
+    pool = Pool(32)
     # Byref required
     f = dill.dumps(fn, byref=True)
     results = [pool.apply_async(run_dill_fn, [f, x, *args], kwargs) for x in inputs]
