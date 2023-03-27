@@ -34,7 +34,7 @@ def submit_job(command, partition='short',
                        f'--mem={mem_gb}Gb',
                        f'--ntasks-per-node=1',
                        f'--cpus-per-task=32',
-                       f'--output={logfile}', '--open-mode={openmode}',
+                       f'--output={logfile}',
                        # Note that we single-quote the command for safety
                        f"--wrap='{command}'"])
 

@@ -754,8 +754,19 @@ class Game:
             # Allow for game specific conditions (winning, losing, etc.)
             self.rules.process(self.state, self)
             # Track progress
-            if agentIndex == numAgents + 1:
+            # (NOTE Ryan 3/26/23) Had to fix agent indexing to (-1) so numMoves 
+            # tracking worked
+            if agentIndex == numAgents - 1:
                 self.numMoves += 1
+                
+            # (NOTE Ryan 3/26/23) Added limit to number of moves
+            #print(self.state.getNumFood())
+            #print(self.numMoves)
+            if (self.numMoves >= 150):
+                self.state.data._lose = True
+                print("Pacman lost on time! Got score %d", self.state.data.score)
+                self.gameOver = True
+                
             # Next agent
             agentIndex = (agentIndex + 1) % numAgents
 

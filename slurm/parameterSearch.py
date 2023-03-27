@@ -17,7 +17,6 @@ for mutation in [0.002, 0.004, 0.008]:
                 job_name=job_name,
                 mem_gb=24,
                 n_cpu=1,
-                logfile=f'/home/heminway.r/logs/{job_name}.LOG',
-                openmode='append')
+                logfile=f'/home/heminway.r/logs/{job_name}.LOG')
  
 
