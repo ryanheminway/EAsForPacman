@@ -45,8 +45,8 @@ def submit_job(command, partition='short',
 
     job_id = re.compile('Submitted batch job (\d+)').search(stdout).group(1)
 
-    send_mail(subject='DISCOVERY_JOB_SUBMIT_SUCCESS',
-              body=f'Successfully submitted job {job_id}, using command:\n\n{command}')
+    # send_mail(subject='DISCOVERY_JOB_SUBMIT_SUCCESS',
+    #           body=f'Successfully submitted job {job_id}, using command:\n\n{command}')
     return
 
 def send_mail(body, subject, recip='heminway.r@northeastern.edu'):

@@ -29,7 +29,7 @@ class PacmanControllerModel(object):
                 to match the returned format from `getWeights()`
                 
     """
-    def __init__(self, in_dim=12, hidden_dim=6, weights=np.array([])):
+    def __init__(self, in_dim=8, hidden_dim=6, weights=np.array([])):
         assert(in_dim > 0)
         assert(hidden_dim > 0)
         self.in_dim = in_dim
@@ -101,12 +101,9 @@ class PacmanControllerModel(object):
         Helper to initialize all weights and biases in a NN. Uses a rough 
         Xavier initialization where all biases are set to 0.
         """
-        # (NOTE Ryan 3/21) Trying Gaussian Mutation and Initializations based on https://arxiv.org/pdf/1712.06567.pdf
-        #w1 = np.random.uniform(low=-np.sqrt(1/(self.in_dim)), high=np.sqrt((1/(self.in_dim))), size=self.in_dim * self.hidden_dim).round(3)
-        w1 = np.random.normal(loc=0.0, scale=np.sqrt((1/(self.in_dim))), size=self.in_dim * self.hidden_dim)
+        w1 = np.random.uniform(low=-np.sqrt(1/(self.in_dim)), high=np.sqrt((1/(self.in_dim))), size=self.in_dim * self.hidden_dim).round(3)
         b1 = np.zeros(self.hidden_dim)
-        #w2 = np.random.uniform(low=-np.sqrt(1/(self.hidden_dim)), high=np.sqrt((1/(self.hidden_dim))), size=self.hidden_dim * 4).round(3)
-        w2 = np.random.normal(loc=0.0, scale=np.sqrt((1/(self.hidden_dim))), size=self.hidden_dim * 4)
+        w2 = np.random.uniform(low=-np.sqrt(1/(self.hidden_dim)), high=np.sqrt((1/(self.hidden_dim))), size=self.hidden_dim * 4).round(3)
         b2 = np.zeros(4)
         
         weights = np.concatenate((w1, b1, w2, b2), axis=None).round(3)
@@ -116,10 +113,7 @@ class PacmanControllerModel(object):
         """
         Helper to initialize a single weight in a NN
         """
-        # (NOTE Ryan 3/21) Trying Gaussian Mutation and Initializations based on https://arxiv.org/pdf/1712.06567.pdf
-        #return round(np.random.uniform(low=-np.sqrt(1/self.hidden_dim), high=np.sqrt(1/self.hidden_dim)), 3)
-        return round(np.random.normal(loc=0.0, scale=np.sqrt(1/self.hidden_dim)), 3)
-    
+        return round(np.random.uniform(low=-np.sqrt(1/self.hidden_dim), high=np.sqrt(1/self.hidden_dim)), 3)    
     
     
 # ------------ TEST BED ---------------#
