@@ -50,9 +50,7 @@ class GeneticAgent(Agent):
                 self.powerpill_time_consumed = 0
                 break
 
-        features = np.array([[self.calcPillsLeftFeature(state),
-                              self.calcPowerLeftFeature(state),
-                              self.calcPillLocationFeature(state, Directions.NORTH),
+        features = np.array([[self.calcPillLocationFeature(state, Directions.NORTH),
                               self.calcPillLocationFeature(state, Directions.EAST),
                               self.calcPillLocationFeature(state, Directions.SOUTH),
                               self.calcPillLocationFeature(state, Directions.WEST),

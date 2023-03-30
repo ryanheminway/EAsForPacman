@@ -123,7 +123,11 @@ class GameState:
 
         # Time passes
         if agentIndex == 0:
-            state.data.scoreChange += -TIME_PENALTY  # Penalty for waiting around
+            # (NOTE Ryan 3/27) Testing an annealing penalty
+            if (state.getNumFood() < 20):
+                state.data.scoreChange += (-TIME_PENALTY * 0.2)  # Lower penalty when few food remain
+            else:
+                state.data.scoreChange += -TIME_PENALTY  # Penalty for waiting around
         else:
             GhostRules.decrementTimer(state.data.agentStates[agentIndex])
 
@@ -389,7 +393,7 @@ class PacmanRules:
             # TODO: cache numFood?
             numFood = state.getNumFood()
             if numFood == 0 and not state.data._lose:
-                state.data.scoreChange += 200 # wWAS 500
+                state.data.scoreChange += 200 # WAS 500
                 state.data._win = True
         # Eat capsule
         if(position in state.getCapsules()):
@@ -795,11 +799,11 @@ def runGenetic(layout, ghosts, display, population, generations, mutation, cross
         return (score / numGames)
     
     # Setup models folder
-    model_path = str(Path.cwd()) + "/models/"
+    model_path = str(Path.cwd()) + "/models/" + "noPillFeat20230330/"
     Path(model_path).mkdir(parents=True, exist_ok=True)
     
     # Run pre-trained model
-    # model_path = model_path + "newXavierSlurmExperiments20230319/" + "newWeightsBaselineG1000N1000M0.01C0.5.npy"
+    # model_path = model_path + "testModelLoadingG10N10M0.1C0.9E0.1.npy"
     # replaySavedModel(model_path, layout, ghosts, display)
     
     # Run GA
@@ -811,12 +815,12 @@ def runGenetic(layout, ghosts, display, population, generations, mutation, cross
                                   rate_mutation=mutation, 
                                   rate_crossover=crossover)
     bestByGen = gaTraining.run()
-    bestWeights = bestByGen[gaTraining.num_generations - 1]
+    bestWeights = bestByGen # bestByGen[gaTraining.num_generations - 1]
     
     weightsFileTemplateStr = "{desc}G{gens}N{pop}M{mut}C{cross}E{elites}"
     
     # Save weights to a file
-    weightsFileName = model_path + weightsFileTemplateStr.format(desc="testNew",
+    weightsFileName = model_path + weightsFileTemplateStr.format(desc="allGensNoPill",
                                                                   gens=gaTraining.num_generations, 
                                                                   pop=gaTraining.num_individuals,
                                                                   mut=gaTraining.rate_mutation,
@@ -841,6 +845,7 @@ def replaySavedModel(model_path, layout, ghosts, display):
     from pacmanNN import PacmanControllerModel
     from geneticAgents import GeneticAgent
     bestWeights = np.load(model_path)
+    bestWeights = bestWeights[-1]
     input("Press Enter to continue...")
     input("Press Enter to continue...")
     # show best

@@ -19,16 +19,37 @@ def plot_scores(file_path):
     for file in files:
         with open(os.path.join(file_path, file), 'r') as f:
             scores = [float(line.split(':')[-1]) for line in f]
-        ax.plot(scores, label=file)
+        if (scores[-1] > 500):   
+            ax.plot(scores, label=file)
     ax.set_xlabel('Generation')
     ax.set_ylabel('Model Performance')
     ax.set_title('GA Pacman Results')
     ax.legend()
     plt.show()
+    plt.legend(loc='best', fancybox=True, shadow=True)
 
+def find_bad_logs(file_path):
+    """
+    Given a directory file path, return a list of all file names which correspond
+    to logs with errors or bad formatting. Really anything that will break the
+    `plot_scores` function.
+    """
+    badfiles = list()
+    files = [f for f in os.listdir(file_path) if f.endswith('.LOG')]
+    fig, ax = plt.subplots()
+    for file in files:
+        with open(os.path.join(file_path, file), 'r') as f:
+            try:
+                scores = [float(line.split(':')[-1]) for line in f]
+            except: 
+                badfiles.append(file)
+                
+    return badfiles
+    
 
 
 # -------------- TEST BED ----------------- #        
 if __name__ == '__main__':
-    logDir = str(Path.cwd()) + "/models/" + "testMoveLimits20230326/"
+    logDir = str(Path.cwd()) + "/models/" + "twelveFeatsWithAnnealing20230327/"
+    #print(find_bad_logs(logDir))
     plot_scores(logDir)

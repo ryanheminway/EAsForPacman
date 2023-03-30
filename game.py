@@ -762,9 +762,9 @@ class Game:
             # (NOTE Ryan 3/26/23) Added limit to number of moves
             #print(self.state.getNumFood())
             #print(self.numMoves)
-            if (self.numMoves >= 150):
+            if (self.numMoves >= 75):
                 self.state.data._lose = True
-                print("Pacman lost on time! Got score %d", self.state.data.score)
+                #print("Pacman lost on time! Got score %d", self.state.data.score)
                 self.gameOver = True
                 
             # Next agent
