@@ -123,6 +123,10 @@ class GameState:
 
         # Time passes
         if agentIndex == 0:
+            # (NOTE Ryan 4/3) Testing movement score to encourage motion
+            if (action != Directions.STOP):
+                state.data.movementScore += 5
+                #state.data.scoreChange += 5
             # (NOTE Ryan 3/27) Testing an annealing penalty
             if (state.getNumFood() < 20):
                 state.data.scoreChange += (-TIME_PENALTY * 0.2)  # Lower penalty when few food remain
@@ -393,7 +397,7 @@ class PacmanRules:
             # TODO: cache numFood?
             numFood = state.getNumFood()
             if numFood == 0 and not state.data._lose:
-                state.data.scoreChange += 200 # WAS 500
+                state.data.scoreChange += 500 # WAS 500
                 state.data._win = True
         # Eat capsule
         if(position in state.getCapsules()):
@@ -474,7 +478,7 @@ class GhostRules:
             state.data._eaten[agentIndex] = True
         else:
             if not state.data._win:
-                state.data.scoreChange -= 200 # WAS 500
+                state.data.scoreChange -= 500 
                 state.data._lose = True
     collide = staticmethod(collide)
 
@@ -528,6 +532,7 @@ def readCommand(argv):
     parser.add_option('--genetic', dest='isGenetic', action='store_true', 
                       help='Train a GeneticAgent using the GA algorithm', 
                       default=False)
+    parser.add_option('--tournySize', type='int', dest='tournySize', default=20)
     parser.add_option('--gens', type='int', dest='numGenerations',
                       help=default('The number of generations to train for'), default=100)
     parser.add_option('--pop', type='int', dest='sizePop',
@@ -632,6 +637,7 @@ def readCommand(argv):
     args['generations'] = options.numGenerations
     args['mutation'] = options.mutationRate
     args['crossover'] = options.crossoverRate
+    args['tournySize'] = options.tournySize
 
     # Special case: recorded games don't use the runGames method or args structure
     if options.gameToReplay != None:
@@ -700,13 +706,13 @@ def replayGame(layout, actions, display):
 
 def runGames(layout, pacman, ghosts, display, numGames, record, numTraining=0,
              catchExceptions=False, timeout=30, genetic=False, population=100,
-             generations=100, mutation=0.1, crossover=0.9):
+             generations=100, mutation=0.1, crossover=0.9, tournySize=20):
     import __main__
     __main__.__dict__['_display'] = display
     
     # If running GA, jump to our own code
     if (genetic):
-        return runGenetic(layout, ghosts, display, population, generations, mutation, crossover)
+        return runGenetic(layout, ghosts, display, population, generations, mutation, crossover, tournySize)
 
     rules = ClassicGameRules(timeout)
     games = []
@@ -750,7 +756,7 @@ def runGames(layout, pacman, ghosts, display, numGames, record, numTraining=0,
 
     return games
 
-def runGenetic(layout, ghosts, display, population, generations, mutation, crossover):
+def runGenetic(layout, ghosts, display, population, generations, mutation, crossover, tournySize):
     """
     Run Genetic Algorithm for training the GeneticAgent. Does not take in a 
     Pacman type, because this method always uses GeneticAgent. 
@@ -778,32 +784,33 @@ def runGenetic(layout, ghosts, display, population, generations, mutation, cross
         score = 0
 
         # (NOTE Ryan) trying average score of 10 runs
-        numGames = 10
+        numGames = 1
         for i in range(numGames):
             game = rules.newGame(layout, currentPacman, ghosts,
                                  gameDisplay, True, False)
             
             game.run()
             score += game.state.getScore()
+            #score += game.state.movementScore
             
         """
         Scoring:
             [TRYING +25] +10 for eating food
             +200 for eating powerpill
             +200 for eating scared ghost
-            [TRYING 200] +500 for win
+            +500 for win
             
-            [TRYING 200] -500 for lose
+            -500 for lose
             -1 for timestep
         """
         return (score / numGames)
     
     # Setup models folder
-    model_path = str(Path.cwd()) + "/models/" + "noPillFeat20230330/"
+    model_path = str(Path.cwd()) + "/models/" + "zeroGhostsTournyAndMutTests20230405/"
     Path(model_path).mkdir(parents=True, exist_ok=True)
     
     # Run pre-trained model
-    # model_path = model_path + "testModelLoadingG10N10M0.1C0.9E0.1.npy"
+    # model_path = model_path + "zeroGhostsEightMedGALimit180G10000N100M0.01C1.0E0.1.npy"
     # replaySavedModel(model_path, layout, ghosts, display)
     
     # Run GA
@@ -811,18 +818,19 @@ def runGenetic(layout, ghosts, display, population, generations, mutation, cross
                                   num_genes=PacmanControllerModel().getWeights().size, 
                                   num_generations=generations,
                                   num_individuals=population,
-                                  #tourny_size=tournySize,
+                                  tourny_size=tournySize,
                                   rate_mutation=mutation, 
                                   rate_crossover=crossover)
     bestByGen = gaTraining.run()
     bestWeights = bestByGen # bestByGen[gaTraining.num_generations - 1]
     
-    weightsFileTemplateStr = "{desc}G{gens}N{pop}M{mut}C{cross}E{elites}"
+    weightsFileTemplateStr = "{desc}G{gens}N{pop}T{tourny}M{mut}C{cross}E{elites}"
     
     # Save weights to a file
-    weightsFileName = model_path + weightsFileTemplateStr.format(desc="allGensNoPill",
+    weightsFileName = model_path + weightsFileTemplateStr.format(desc="zeroGhostsTournySmGALim140",
                                                                   gens=gaTraining.num_generations, 
                                                                   pop=gaTraining.num_individuals,
+                                                                  tourny=gaTraining.tourny_size,
                                                                   mut=gaTraining.rate_mutation,
                                                                   cross=gaTraining.rate_crossover,
                                                                   elites=gaTraining.proportion_elite)
@@ -851,8 +859,8 @@ def replaySavedModel(model_path, layout, ghosts, display):
     # show best
     rules = ClassicGameRules(30)
     rules.quiet = False
-    # print("Got best weights:")
-    # print(bestWeights)
+    print("Got best weights:")
+    print(bestWeights)
     # Make a neural network based on the weights
     bestNN = PacmanControllerModel(weights=bestWeights)
     # Make an agent based on the nn acting as a control policy

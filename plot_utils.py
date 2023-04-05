@@ -19,7 +19,7 @@ def plot_scores(file_path):
     for file in files:
         with open(os.path.join(file_path, file), 'r') as f:
             scores = [float(line.split(':')[-1]) for line in f]
-        if (scores[-1] > 500):   
+        if (scores[-1] < 700):   
             ax.plot(scores, label=file)
     ax.set_xlabel('Generation')
     ax.set_ylabel('Model Performance')
@@ -50,6 +50,6 @@ def find_bad_logs(file_path):
 
 # -------------- TEST BED ----------------- #        
 if __name__ == '__main__':
-    logDir = str(Path.cwd()) + "/models/" + "twelveFeatsWithAnnealing20230327/"
+    logDir = str(Path.cwd()) + "/models/" + "zeroGhostsAnnealing20230404/"
     #print(find_bad_logs(logDir))
     plot_scores(logDir)

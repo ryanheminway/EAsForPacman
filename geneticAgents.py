@@ -54,14 +54,14 @@ class GeneticAgent(Agent):
                               # self.calcPillLocationFeature(state, Directions.EAST),
                               # self.calcPillLocationFeature(state, Directions.SOUTH),
                               # self.calcPillLocationFeature(state, Directions.WEST),
-        features = np.array([[self.calcGhostLocationFeature(state, Directions.NORTH),
+        features = np.array([[self.calcPillLocationFeature(state, Directions.NORTH),
+                              self.calcPillLocationFeature(state, Directions.EAST),
+                              self.calcPillLocationFeature(state, Directions.SOUTH),
+                              self.calcPillLocationFeature(state, Directions.WEST),
+                              self.calcGhostLocationFeature(state, Directions.NORTH),
                               self.calcGhostLocationFeature(state, Directions.EAST),
                               self.calcGhostLocationFeature(state, Directions.SOUTH),
-                              self.calcGhostLocationFeature(state, Directions.WEST),
-                              self.calcAvoidWallsFeature(state, Directions.NORTH),
-                              self.calcAvoidWallsFeature(state, Directions.EAST),
-                              self.calcAvoidWallsFeature(state, Directions.SOUTH),
-                              self.calcAvoidWallsFeature(state, Directions.WEST)]])
+                              self.calcGhostLocationFeature(state, Directions.WEST)]], dtype=np.float32)
         if (self.verbose):
             print("Got feature vector:")
             print(features)

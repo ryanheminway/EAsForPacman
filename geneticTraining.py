@@ -260,9 +260,10 @@ class GenerationalGA(GeneticAlgorithm):
             
             # 2. Pick 2 parents using tournament selection
             for i in range(2):
-                #parents[i] = GeneticAlgorithm.tournamentSelect(self.scores, self.individuals, tournySize=self.tourny_size)
+                # (NOTE 4/5) Going back tournament selection
+                parents[i] = GeneticAlgorithm.tournamentSelect(self.scores, self.individuals, tournySize=self.tourny_size)
                 # (NOTE Ryan) TRYING TRUNCATED SELECTION OVER TOURNAMENT SELECTION: Use a random elite as a parent
-                parents[i] = nextPopulation[np.random.randint(0, self.num_elites)]
+                #parents[i] = nextPopulation[np.random.randint(0, self.num_elites)]
                 
             # Perform single point crossover between parents to generate child.
             (childOne, childTwo) = self.crossover(parents[0], parents[1], self.rate_crossover)
@@ -303,13 +304,11 @@ class GenerationalGA(GeneticAlgorithm):
     
     def mutate(self, a):
         a_copy = a.copy()
-        # Each gene in the chromosome has a chance to be mutated
-        # (NOTE Ryan 3/21) Trying Gaussian Mutation and Initializations based on https://arxiv.org/pdf/1712.06567.pdf
-        a_copy = a_copy + (self.rate_mutation * np.random.normal(loc=0.0, scale=np.sqrt(1/24), size=a_copy.size).round(3))
-        # for i in range(a_copy.size):
-        #     mutate_chance = np.random.random()
-        #     if mutate_chance < self.rate_mutation:
-        #         a_copy[i] = self.generate_random_allele()            
+        # Each gene in the chromosome has a chance to be mutate
+        for i in range(a_copy.size):
+            mutate_chance = np.random.random()
+            if mutate_chance < self.rate_mutation:
+                a_copy[i] = self.generate_random_allele()            
         return a_copy
     
     

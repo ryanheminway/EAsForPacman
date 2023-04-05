@@ -406,6 +406,7 @@ class GameStateData:
             self.layout = prevState.layout
             self._eaten = prevState._eaten
             self.score = prevState.score
+            self.movementScore = prevState.movementScore
 
         self._foodEaten = None
         self._foodAdded = None
@@ -524,6 +525,7 @@ class GameStateData:
         self.layout = layout
         self.score = 0
         self.scoreChange = 0
+        self.movementScore = 0
 
         self.agentStates = []
         numGhosts = 0
@@ -762,7 +764,7 @@ class Game:
             # (NOTE Ryan 3/26/23) Added limit to number of moves
             #print(self.state.getNumFood())
             #print(self.numMoves)
-            if (self.numMoves >= 75):
+            if (self.numMoves >= 140):
                 self.state.data._lose = True
                 #print("Pacman lost on time! Got score %d", self.state.data.score)
                 self.gameOver = True
