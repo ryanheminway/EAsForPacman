@@ -130,6 +130,14 @@ class GeneticAlgorithm:
                 winnerIdx = contestantIdx
                 
         return population[winnerIdx]
+    
+    @staticmethod 
+    def rouletteSelect(scores, population):
+        totalScore = sum(scores)
+        selection_probs = [score/totalScore for score in scores]
+        # Roulette wheel where size of wedge is proportial to fitness
+        return population[np.random.choice(len(population), p=selection_probs)]
+        
         
                 
 class SteadyStateGA(GeneticAlgorithm):
@@ -223,10 +231,11 @@ class GenerationalGA(GeneticAlgorithm):
     survive between generations. 
     """
     def __init__(self, fitness_fn, num_genes=4, num_individuals=100, num_generations=1000,
-                 rate_mutation=0.1, rate_crossover=0.5, proportion_elite=0.1, tourny_size=20):
+                 rate_mutation=0.1, rate_crossover=0.5, proportion_elite=0.1, tourny_size=20, selection_type="roulette"):
         super().__init__(fitness_fn, num_genes, num_individuals, num_generations, 
                        rate_mutation, rate_crossover)
         assert(proportion_elite <= 1 and proportion_elite >= 0)
+        self.selection_type = selection_type
         self.proportion_elite = proportion_elite
         self.num_elites = int(proportion_elite * num_individuals)
         self.tourny_size = tourny_size
@@ -257,13 +266,15 @@ class GenerationalGA(GeneticAlgorithm):
         
         nextIdx = self.num_elites
         for n in range(int((self.num_individuals - self.num_elites) / 2)):
-            
-            # 2. Pick 2 parents using tournament selection
+            # 2. Pick 2 parents using selection operator specified
             for i in range(2):
-                # (NOTE 4/5) Going back tournament selection
-                parents[i] = GeneticAlgorithm.tournamentSelect(self.scores, self.individuals, tournySize=self.tourny_size)
-                # (NOTE Ryan) TRYING TRUNCATED SELECTION OVER TOURNAMENT SELECTION: Use a random elite as a parent
-                #parents[i] = nextPopulation[np.random.randint(0, self.num_elites)]
+                if self.selection_type == "tournament":
+                    parents[i] = GeneticAlgorithm.tournamentSelect(self.scores, self.individuals, tournySize=self.tourny_size)
+                elif self.selection_type == "roulette":
+                    parents[i] = GeneticAlgorithm.rouletteSelect(self.scores, self.indivdiuals)
+                else: # Truncated selection
+                    # Use a random elite as parent
+                    parents[i] = nextPopulation[np.random.randint(0, self.num_elites)]
                 
             # Perform single point crossover between parents to generate child.
             (childOne, childTwo) = self.crossover(parents[0], parents[1], self.rate_crossover)
