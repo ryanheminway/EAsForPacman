@@ -19,11 +19,12 @@ def plot_scores(file_path):
     for file in files:
         with open(os.path.join(file_path, file), 'r') as f:
             scores = [float(line.split(':')[-1]) for line in f]
-        if (scores[-1] < 700):   
+        if (scores[-1] > 1400 and scores[-1] > 0):
+        #if 'Truncate' in file
             ax.plot(scores, label=file)
     ax.set_xlabel('Generation')
     ax.set_ylabel('Model Performance')
-    ax.set_title('GA Pacman Results')
+    ax.set_title('GA Results')
     ax.legend()
     plt.show()
     plt.legend(loc='best', fancybox=True, shadow=True)

@@ -133,8 +133,10 @@ class GeneticAlgorithm:
     
     @staticmethod 
     def rouletteSelect(scores, population):
-        totalScore = sum(scores)
-        selection_probs = [score/totalScore for score in scores]
+        minScore = abs(min(scores))
+        newScores = [(s + minScore) for s in scores]
+        totalScore = sum(newScores)
+        selection_probs = [score/totalScore for score in newScores]
         # Roulette wheel where size of wedge is proportial to fitness
         return population[np.random.choice(len(population), p=selection_probs)]
         
@@ -231,7 +233,7 @@ class GenerationalGA(GeneticAlgorithm):
     survive between generations. 
     """
     def __init__(self, fitness_fn, num_genes=4, num_individuals=100, num_generations=1000,
-                 rate_mutation=0.1, rate_crossover=0.5, proportion_elite=0.1, tourny_size=20, selection_type="roulette"):
+                 rate_mutation=0.1, rate_crossover=0.5, proportion_elite=0.1, tourny_size=10, selection_type="roulette"):
         super().__init__(fitness_fn, num_genes, num_individuals, num_generations, 
                        rate_mutation, rate_crossover)
         assert(proportion_elite <= 1 and proportion_elite >= 0)
@@ -271,7 +273,7 @@ class GenerationalGA(GeneticAlgorithm):
                 if self.selection_type == "tournament":
                     parents[i] = GeneticAlgorithm.tournamentSelect(self.scores, self.individuals, tournySize=self.tourny_size)
                 elif self.selection_type == "roulette":
-                    parents[i] = GeneticAlgorithm.rouletteSelect(self.scores, self.indivdiuals)
+                    parents[i] = GeneticAlgorithm.rouletteSelect(self.scores, self.individuals)
                 else: # Truncated selection
                     # Use a random elite as parent
                     parents[i] = nextPopulation[np.random.randint(0, self.num_elites)]

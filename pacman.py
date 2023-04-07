@@ -541,6 +541,8 @@ def readCommand(argv):
                       help=default('Rate of mutation to use (0.0-1.0)'), default=0.1)
     parser.add_option('--crossover', type='float', dest='crossoverRate',
                       help=default('Rate of crossover to use (0.0-1.0)'), default=0.9)
+    parser.add_option('--run', type='int', dest='runIdx', default=1)
+    parser.add_option('--selection', dest='selectionOp', default='roulette')
     #
     parser.add_option('-n', '--numGames', dest='numGames', type='int',
                       help=default('the number of GAMES to play'), metavar='GAMES', default=1)
@@ -638,6 +640,8 @@ def readCommand(argv):
     args['mutation'] = options.mutationRate
     args['crossover'] = options.crossoverRate
     args['tournySize'] = options.tournySize
+    args['selection'] = options.selectionOp
+    args['runIdx'] = options.runIdx
 
     # Special case: recorded games don't use the runGames method or args structure
     if options.gameToReplay != None:
@@ -706,13 +710,15 @@ def replayGame(layout, actions, display):
 
 def runGames(layout, pacman, ghosts, display, numGames, record, numTraining=0,
              catchExceptions=False, timeout=30, genetic=False, population=100,
-             generations=100, mutation=0.1, crossover=0.9, tournySize=20):
+             generations=100, mutation=0.1, crossover=0.9, tournySize=20, 
+             runIdx=1, selection='roulette'):
     import __main__
     __main__.__dict__['_display'] = display
     
     # If running GA, jump to our own code
     if (genetic):
-        return runGenetic(layout, ghosts, display, population, generations, mutation, crossover, tournySize)
+        return runGenetic(layout, ghosts, display, population, generations, 
+                          mutation, crossover, tournySize, selection, runIdx)
 
     rules = ClassicGameRules(timeout)
     games = []
@@ -756,7 +762,7 @@ def runGames(layout, pacman, ghosts, display, numGames, record, numTraining=0,
 
     return games
 
-def runGenetic(layout, ghosts, display, population, generations, mutation, crossover, tournySize):
+def runGenetic(layout, ghosts, display, population, generations, mutation, crossover, tournySize, selection, runIdx):
     """
     Run Genetic Algorithm for training the GeneticAgent. Does not take in a 
     Pacman type, because this method always uses GeneticAgent. 
@@ -806,34 +812,37 @@ def runGenetic(layout, ghosts, display, population, generations, mutation, cross
         return (score / numGames)
     
     # Setup models folder
-    model_path = str(Path.cwd()) + "/models/" + "zeroGhostsTournyAndMutTests20230405/"
+    model_path = str(Path.cwd()) + "/models/" + "zeroGhostsPillFtOnlySelectionCompare20230407/"
     Path(model_path).mkdir(parents=True, exist_ok=True)
     
     # Run pre-trained model
-    # model_path = model_path + "zeroGhostsEightMedGALimit180G10000N100M0.01C1.0E0.1.npy"
+    # model_path = model_path + "zeroGhostsEightSmGALim140G1000N1000T10M0.012C1.0E0.1.npy"
     # replaySavedModel(model_path, layout, ghosts, display)
     
-    # Run GA
+    # # Run GA
     gaTraining = GenerationalGA(fitness_fn=geneticFitnessFn, 
                                   num_genes=PacmanControllerModel().getWeights().size, 
                                   num_generations=generations,
                                   num_individuals=population,
-                                  tourny_size=tournySize,
+                                  #tourny_size=tournySize,
                                   rate_mutation=mutation, 
-                                  rate_crossover=crossover)
+                                  rate_crossover=crossover,
+                                  selection_type=selection)
     bestByGen = gaTraining.run()
     bestWeights = bestByGen # bestByGen[gaTraining.num_generations - 1]
     
-    weightsFileTemplateStr = "{desc}G{gens}N{pop}T{tourny}M{mut}C{cross}E{elites}"
+    weightsFileTemplateStr = "{desc}G{gens}N{pop}S{selection}T{tourny}M{mut}C{cross}E{elites}R{run}"
     
     # Save weights to a file
-    weightsFileName = model_path + weightsFileTemplateStr.format(desc="zeroGhostsTournySmGALim140",
+    weightsFileName = model_path + weightsFileTemplateStr.format(desc="zeroGhostsSmGA",
                                                                   gens=gaTraining.num_generations, 
                                                                   pop=gaTraining.num_individuals,
                                                                   tourny=gaTraining.tourny_size,
                                                                   mut=gaTraining.rate_mutation,
                                                                   cross=gaTraining.rate_crossover,
-                                                                  elites=gaTraining.proportion_elite)
+                                                                  elites=gaTraining.proportion_elite,
+                                                                  selection=selection,
+                                                                  run=runIdx)
     np.save(weightsFileName, bestWeights)
     
     
