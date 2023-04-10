@@ -15,11 +15,12 @@ def plot_scores(file_path):
     where each line reports a single generation's fitness after a ":". 
     """
     files = [f for f in os.listdir(file_path) if f.endswith('.LOG')]
+    print(len(files))
     fig, ax = plt.subplots()
     for file in files:
         with open(os.path.join(file_path, file), 'r') as f:
             scores = [float(line.split(':')[-1]) for line in f]
-        if (scores[-1] > 1400 and scores[-1] > 0):
+        if (scores[-5000] > 1500 and scores[-1] > 500):
         #if 'Truncate' in file
             ax.plot(scores, label=file)
     ax.set_xlabel('Generation')
@@ -51,6 +52,6 @@ def find_bad_logs(file_path):
 
 # -------------- TEST BED ----------------- #        
 if __name__ == '__main__':
-    logDir = str(Path.cwd()) + "/models/" + "zeroGhostsAnnealing20230404/"
+    logDir = str(Path.cwd()) + "/models/" + "zeroGhostsPillFtOnlySelectionCompare20230407/"
     #print(find_bad_logs(logDir))
     plot_scores(logDir)

@@ -45,6 +45,9 @@ class GeneticAlgorithm:
         
         # Track generation
         self.generation = 0
+        # Track ALL individuals and ALL scores across each generation
+        self.individuals_by_gen = np.empty((num_generations, self.num_individuals, num_genes))
+        self.scores_by_gen = np.empty((num_generations, self.num_individuals))
         # Track best individual for each generation (index is generation)
         self.best_by_gen = np.empty((num_generations, num_genes))
     
@@ -70,7 +73,10 @@ class GeneticAlgorithm:
             self.step()
             
         # Return the best individual for each gen
-        return self.best_by_gen 
+        #return self.best_by_gen 
+        
+        # Return all individuals and all scores by generation
+        return self.individuals_by_gen, self.scores_by_gen
     
     def step(self):
         """
@@ -303,12 +309,14 @@ class GenerationalGA(GeneticAlgorithm):
         best_idx = np.argmax(self.scores)
         print("Best fitness value of this generation: ", self.scores[best_idx])
         self.individuals = nextPopulation
-        self.best_by_gen[self.generation] = self.individuals[best_idx]
+        self.individuals_by_gen[self.generation] = self.individuals.copy()
+        self.scores_by_gen[self.generation] = self.scores.copy()
+        #self.best_by_gen[self.generation] = self.individuals[best_idx]
         self.generation += 1            
         
         
     def crossover(self, a, b, prob_crossover):
-        if np.random.random() < prob_crossover:      
+        if np.random.random() < prob_crossover:     
             idx = np.random.randint(0, a.size)
             return GeneticAlgorithm.singlePointCrossover(a, b, idx)
         else:

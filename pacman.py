@@ -810,16 +810,17 @@ def runGenetic(layout, ghosts, display, population, generations, mutation, cross
             -1 for timestep
         """
         return (score / numGames)
-    
+
+
     # Setup models folder
     model_path = str(Path.cwd()) + "/models/" + "zeroGhostsPillFtOnlySelectionCompare20230407/"
     Path(model_path).mkdir(parents=True, exist_ok=True)
     
     # Run pre-trained model
-    # model_path = model_path + "zeroGhostsEightSmGALim140G1000N1000T10M0.012C1.0E0.1.npy"
+    # model_path = model_path + "zeroGhostsSmGAG10000N100StournamentT10M0.05C0.0E0.1R7.npy"
     # replaySavedModel(model_path, layout, ghosts, display)
     
-    # # Run GA
+    # Run GA
     gaTraining = GenerationalGA(fitness_fn=geneticFitnessFn, 
                                   num_genes=PacmanControllerModel().getWeights().size, 
                                   num_generations=generations,
@@ -828,12 +829,14 @@ def runGenetic(layout, ghosts, display, population, generations, mutation, cross
                                   rate_mutation=mutation, 
                                   rate_crossover=crossover,
                                   selection_type=selection)
-    bestByGen = gaTraining.run()
-    bestWeights = bestByGen # bestByGen[gaTraining.num_generations - 1]
-    
-    weightsFileTemplateStr = "{desc}G{gens}N{pop}S{selection}T{tourny}M{mut}C{cross}E{elites}R{run}"
-    
+    allWeights, allScores = gaTraining.run()
+    # np.set_printoptions(threshold=sys.maxsize)
+    # print(allWeights)
+    # print(allScores)
+    # bestWeights= bestByGen # bestByGen[gaTraining.num_generations - 1]
+
     # Save weights to a file
+    weightsFileTemplateStr = "{desc}G{gens}N{pop}S{selection}T{tourny}M{mut}C{cross}E{elites}R{run}"
     weightsFileName = model_path + weightsFileTemplateStr.format(desc="zeroGhostsSmGA",
                                                                   gens=gaTraining.num_generations, 
                                                                   pop=gaTraining.num_individuals,
@@ -843,8 +846,20 @@ def runGenetic(layout, ghosts, display, population, generations, mutation, cross
                                                                   elites=gaTraining.proportion_elite,
                                                                   selection=selection,
                                                                   run=runIdx)
-    np.save(weightsFileName, bestWeights)
+    np.save(weightsFileName, allWeights)
     
+    # Save scores to a file
+    scoresFileTemplateStr = "{desc}ScoresG{gens}N{pop}S{selection}T{tourny}M{mut}C{cross}E{elites}R{run}"
+    scoresFileName = model_path + scoresFileTemplateStr.format(desc="zeroGhostsSmGA",
+                                                                  gens=gaTraining.num_generations, 
+                                                                  pop=gaTraining.num_individuals,
+                                                                  tourny=gaTraining.tourny_size,
+                                                                  mut=gaTraining.rate_mutation,
+                                                                  cross=gaTraining.rate_crossover,
+                                                                  elites=gaTraining.proportion_elite,
+                                                                  selection=selection,
+                                                                  run=runIdx)
+    np.save(scoresFileName, allScores)
     
     return 0
 
@@ -862,7 +877,7 @@ def replaySavedModel(model_path, layout, ghosts, display):
     from pacmanNN import PacmanControllerModel
     from geneticAgents import GeneticAgent
     bestWeights = np.load(model_path)
-    bestWeights = bestWeights[-1]
+    bestWeights = bestWeights[4000]
     input("Press Enter to continue...")
     input("Press Enter to continue...")
     # show best
@@ -873,7 +888,7 @@ def replaySavedModel(model_path, layout, ghosts, display):
     # Make a neural network based on the weights
     bestNN = PacmanControllerModel(weights=bestWeights)
     # Make an agent based on the nn acting as a control policy
-    bestPacman = GeneticAgent(policy=bestNN, verbose=False)
+    bestPacman = GeneticAgent(policy=bestNN, verbose=True)
     rules.newGame(layout, bestPacman, ghosts,
                           display, False, False).run()
     

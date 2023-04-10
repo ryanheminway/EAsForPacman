@@ -58,13 +58,15 @@ class GeneticAgent(Agent):
                               self.calcPillLocationFeature(state, Directions.EAST),
                               self.calcPillLocationFeature(state, Directions.SOUTH),
                               self.calcPillLocationFeature(state, Directions.WEST)]], dtype=np.float32)
-        if (self.verbose):
-            print("Got feature vector:")
-            print(features)
+
         # Run features through policy NN to get scores for each direction
         run_result = self.policy.run(nn.Constant(data=features))
         # Softmax to get log probabilities over actions
         softmax_result = nn.SoftmaxLoss.log_softmax(run_result.data)
+        if (self.verbose):
+            print("Got feature vector:")
+            print(features)
+            print("Activation values: ", softmax_result)
         # print(softmax_result)
         action_idx = np.argmax(softmax_result)  
         # Map array indices to actions
